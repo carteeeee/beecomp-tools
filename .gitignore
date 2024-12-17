@@ -1,0 +1,8 @@
+# target/build dirs
+txtdialog2c/target
+
+# rom data
+*.z64
+*.v64
+*.n64
+*.lvl64
