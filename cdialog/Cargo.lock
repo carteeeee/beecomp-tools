@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "txtdialog2c"
+name = "cdialog"
 version = "0.1.0"
