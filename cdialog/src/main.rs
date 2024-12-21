@@ -1,22 +1,38 @@
 // written by carter. 20241220
 // "free your thoughts and watch them fly"
-use std::env;
-use std::fs::read;
+use std::{env, fs};
 
 mod texttable;
 const TEXT_START: usize = 8433290;
 const TEXT_LEN: usize = 33428;
 const DATA_START: usize = 8466718;
 
-fn stu(slice: &[u8]) -> u16 {
-    slice[1] as u16 + ((slice[0] as u16) << 8)
+fn add_newlines(input: &str) -> String {
+    let mut lines = input
+        .lines()
+        .map(|line| line.to_owned())
+        .collect::<Vec<_>>();
+    if let Some(last_line) = lines.pop() {
+        lines
+            .iter_mut()
+            .for_each(|line| *line = format!("{}\\n\\", line));
+        lines.push(last_line);
+    }
+    lines.join("\n")
+}
+
+macro_rules! u16frombytes {
+    ($bytes:expr, $offset:literal) => {
+        (($bytes[$offset] as u16) << 8) + ($bytes[$offset + 1] as u16)
+    };
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let romname = args.get(1).expect("you didn't specify a rom!");
+    let output = args.get(2).map_or("dialog.c", |v| v);
 
-    let rom = read(romname).expect("could not read rom!");
+    let rom = fs::read(romname).expect("could not read rom!");
 
     let table = texttable::texttable();
     let mut dialogstext = Vec::new();
@@ -36,15 +52,15 @@ fn main() {
         let offset = DATA_START + (i * 16);
         let data = &rom[offset..(offset + 16)];
         dialogsdata.push((
-            1u32,              // unused, seems to always be 1 and i am lazy
-            data[4],           // linesPerBox
-            stu(&data[6..8]),  // leftOffset
-            stu(&data[8..10]), // width
+            1u32,                    // unused, seems to always be 1 and i am lazy
+            data[4],                 // linesPerBox
+            u16frombytes!(&data, 6), // leftOffset
+            u16frombytes!(&data, 8), // width
         ));
     }
 
     let mut index = 0u8;
-    let cdialog: Vec<String> = dialogstext
+    let cdialog = dialogstext
         .iter()
         .map(|dialogtext| {
             index += 1;
@@ -56,36 +72,11 @@ fn main() {
                 data.1,
                 data.2,
                 data.3,
-                dialogtext
-                    .lines()
-                    .map(|line| format!("{}\\n\\", line))
-                    .collect::<Vec<_>>()
-                    .join("\n"),
+                add_newlines(dialogtext),
             )
         })
-        .collect();
-    println!("{}", cdialog[0]);
+        .collect::<Vec<_>>()
+        .join("\n\n");
 
-    //println!("{:?}", dialogs);
-
-    /* 		function storeDialogue(storeHere, head, maxSize) {
-        let phrase = "";
-
-        for (let i = 0, textIndex = 0; i < maxSize; i++) {
-            let character = rom[head + i];
-
-            if (textTable[character] == undefined) {
-                // Definitely might not be needed.
-                console.log(character);
-            }
-
-            if (character == 255) {
-                output.text[storeHere][textIndex] = phrase;
-                textIndex++;
-                phrase = "";
-            } else {
-                phrase += textTable[character];
-            }
-        }
-    }*/
+    fs::write(output, cdialog).expect("could not write dialog!");
 }

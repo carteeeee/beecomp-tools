@@ -11,4 +11,4 @@ if there's a check, it's done.
 if not, it's in progress/not started
 
 - [ ] .lvl64 importer (in development)
-- [ ] [c dialog exporter](cdialog)
+- [x] [c dialog exporter](cdialog)

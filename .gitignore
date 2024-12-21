@@ -2,6 +2,7 @@
 cdialog/target
 
 # rom data
+cdialog/*.c
 *.lvl64
 *.z64
 *.v64
