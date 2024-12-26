@@ -1,4 +1,5 @@
 # target/build dirs
+m64reader/target
 cdialog/target
 
 # rom data
