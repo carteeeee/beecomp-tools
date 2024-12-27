@@ -3,8 +3,10 @@ m64reader/target
 cdialog/target
 
 # rom data
+m64reader/output
 cdialog/*.c
 *.lvl64
+*.m64
 *.z64
 *.v64
 *.n64
