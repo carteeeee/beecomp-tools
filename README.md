@@ -12,5 +12,6 @@ if not, it's in progress/not started
 
 - [ ] .lvl64 importer (in development)
 - [ ] [m64 exporter](m64reader)
+- [ ] [bhvextractor](bhvextractor)
 - [x] [c dialog exporter](cdialog)
 - [x] [us to jp font for decomp](jpfont)
