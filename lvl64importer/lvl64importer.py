@@ -16,9 +16,14 @@ bl_info = {
     "blender": (3, 2, 0),
 }
 
-SCALE = 0.01
+SCALE = 1 / 100 # sm64 to blender scale
+BOX_HEIGHT = 1 # this can be anything >0
 LEVEL_ROOT_TYPE = "Level Root"
-LEVEL_ROOT_NAME = "Level %s"
+LEVEL_ROOT_NAME = "Level %s - %s"
+OBJECT_TYPE = "Object"
+WATER_BOX_TYPE = "Water Box"
+WATER_TYPE = "Water"
+HAZE_TYPE = "Toxic Haze"
 AREA_ROOT_TYPE = "Area Root"
 AREA_ROOT_NAME = "Area %s"
 AREA_COLL_NAME = "Area Collision"
@@ -47,22 +52,21 @@ def process_file(mappath, filepath):
     with open(mappath) as f:
         map = f.readlines()[BHV_START:BHV_END]
     
-    root = create_level_root(leveljson)
+    root = create_level_root(leveljson, filepath.split("/")[-1])
     
     for area in leveljson["Areas"]:
         process_area(area, root, map)
 
     return {'FINISHED'}
 
-def create_level_root(data):
-    obj = bpy.data.objects.new(LEVEL_ROOT_NAME % data["LevelID"], None)
+def create_level_root(data, filename):
+    obj = bpy.data.objects.new(LEVEL_ROOT_NAME % (data["LevelID"], filename), None)
     obj.sm64_obj_type = LEVEL_ROOT_TYPE
     bpy.context.scene.collection.objects.link(obj)
     
     ### TODO: implement backgrounds (although this might be something trollengine does?)
     
     obj.actSelectorIgnore = not data["ActSelector"]
-    
     
     return obj
 
@@ -76,6 +80,11 @@ def process_area(area, levelroot, map):
     objs = area["Objects"]
     add_objects(objs, root, map)
     
+    boxes = area["SpecialBoxes"]
+    print(boxes)
+    if boxes:
+        add_boxes(boxes, root)
+    
     ### TODO: implement visual model & textures
 
 def create_area_root(data):
@@ -86,7 +95,10 @@ def create_area_root(data):
     obj.areaIndex = data["AreaID"]
     obj.terrainEnum = TERRAINS[data["TerrainType"]]
     obj.echoLevel = hex(data["ReverbLevel"])
-    ### TODO: add greeting dialog
+    
+    obj.showStartDialog = data["ShowMessage"]["Enabled"]
+    obj.startDialog = f"DIALOG_{data["ShowMessage"]["DialogID"]:>03}"
+    
     music = data["BGMusic"]
     if music is 0:
         obj.noMusic = True
@@ -132,10 +144,10 @@ def make_collision(coll, root):
 def add_objects(objects, root, map):
     for object in objects:
         data = base64.b64decode(object["Buffer"])
-        if int(data[3]) == 0:
-            continue
+        #if int(data[3]) == 0:
+        #    continue
         obj = bpy.data.objects.new("Object", None)
-        obj.sm64_obj_type = "Object"
+        obj.sm64_obj_type = OBJECT_TYPE
         obj.sm64_obj_model = str(int(data[3]))
         
         obj.fast64.sm64.game_object.use_individual_params = True
@@ -148,7 +160,7 @@ def add_objects(objects, root, map):
         hexaddr = f"{bhvaddr:x}"
         line = locatebhv(hexaddr, map)
         bhv = [i for i in map[line].split(" ") if i != ""][1].strip()
-        if (line is -1) or (bhv == "bhvBird"):
+        if (line is -1) or (bhv == "bhvBird") or (bhv == "_behaviorSegmentStart"):
             print(hexaddr, root)
             obj.sm64_obj_behaviour = "bhvStaticObject"
         else:
@@ -165,6 +177,31 @@ def add_objects(objects, root, map):
             radians(-int.from_bytes(data[14:16], "big", signed=True)),
             radians(int.from_bytes(data[12:14], "big", signed=True)),
         ))
+        
+        bpy.context.scene.collection.objects.link(obj)
+        obj.parent = root
+
+def add_boxes(boxes, root):
+    for box in boxes:
+        print(box)
+        obj = bpy.data.objects.new("Box", None)
+        obj.empty_display_type = "CUBE"
+        obj.sm64_obj_type = WATER_BOX_TYPE
+        obj.waterBoxType = WATER_TYPE if box["Type"] == 0 else HAZE_TYPE
+        
+        x1 = box["X1"] * SCALE
+        y1 = box["Z1"] * SCALE
+        x2 = box["X2"] * SCALE
+        y2 = box["Z2"] * SCALE
+        z = box["Y"] * SCALE
+        
+        obj.location[0] = (x1 + x2) / 2
+        obj.location[1] = (y1 + y2) / 2
+        obj.location[2] = z - BOX_HEIGHT / 2
+        
+        obj.scale[0] = x2 - x1
+        obj.scale[1] = y2 - y1
+        obj.scale[2] = BOX_HEIGHT
         
         bpy.context.scene.collection.objects.link(obj)
         obj.parent = root
