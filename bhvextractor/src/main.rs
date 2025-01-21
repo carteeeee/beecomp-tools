@@ -8,22 +8,52 @@ use std::{env, fs};
 const SSEGMENTTABLE: usize = 0x33b400;
 const NUM_BANKS: usize = 32;
 
+fn skip_last<T>(mut iter: impl Iterator<Item = T>) -> impl Iterator<Item = T> {
+    let last = iter.next();
+    iter.scan(last, |state, item| std::mem::replace(state, Some(item)))
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let mem =
-        fs::read(args.get(1).expect("you didn't specify a ram dump!")).expect("couldn't read ram");
-    let dir = fs::read_dir(args.get(2).expect("you didn't specify a directory!"))
+    let dir = fs::read_dir(args.get(1).expect("you didn't specify a directory"))
         .expect("couldn't read dir");
-    let seg = args
-        .get(3)
-        .expect("you didn't specify segmented/virt addresses!")
-        == "true";
+
+    let memraw = args.get(2).expect("you didn't specify ramdump");
+    let memop = if memraw == "seg" {
+        None
+    } else {
+        Some(fs::read(memraw).expect("couldn't read ram"))
+    };
+
+    let symraw = args.get(3).expect("you didn't specify sym");
+    let mut tempstr = String::new();
+    let symop = if symraw == "addr" {
+        None
+    } else {
+        // i'm sorry.
+        tempstr.clone_from(&fs::read_to_string(symraw).expect("couldn't read sym.txt"));
+        Some(
+            skip_last(tempstr.split('\n'))
+                .filter_map(|v| {
+                    let mut splitma = v.split_whitespace();
+                    let addr = splitma.next().unwrap();
+                    let name = splitma.next().unwrap();
+                    if name.starts_with(".") {
+                        return None;
+                    }
+                    Some((u32::from_str_radix(addr, 16).unwrap(), name))
+                })
+                .collect::<Vec<_>>(),
+        )
+    };
 
     let mut banks: Vec<u32> = Vec::with_capacity(NUM_BANKS);
     banks.resize(NUM_BANKS, 0);
-    for i in 0..NUM_BANKS {
-        let offset = SSEGMENTTABLE + (i * 4);
-        banks[i] = u32::from_be_bytes(mem[offset..(offset + 4)].try_into().unwrap());
+    if let Some(mem) = &memop {
+        for i in 0..NUM_BANKS {
+            let offset = SSEGMENTTABLE + (i * 4);
+            banks[i] = u32::from_be_bytes(mem[offset..(offset + 4)].try_into().unwrap());
+        }
     }
 
     let mut used: HashSet<u32> = HashSet::new();
@@ -53,9 +83,7 @@ fn main() {
                 let command = BASE64_STANDARD
                     .decode(object["Buffer"].as_str().unwrap())
                     .unwrap();
-                if seg {
-                    used.insert(u32::from_be_bytes(command[20..24].try_into().unwrap()));
-                } else {
+                if let &Some(_) = &memop {
                     let offset = banks[command[20] as usize];
 
                     used.insert(
@@ -64,6 +92,8 @@ fn main() {
                             + (command[23] as u32)
                             + offset,
                     );
+                } else {
+                    used.insert(u32::from_be_bytes(command[20..24].try_into().unwrap()));
                 }
             }
         }
@@ -71,11 +101,27 @@ fn main() {
 
     println!("{}", used.len());
 
-    let mut vecused = used
-        .iter()
-        .map(|v| format!("{:#010x}", v))
-        .collect::<Vec<String>>();
+    let mut vecused = Vec::from_iter(used);
     vecused.sort(); // this isn't ideal, but it prevents personalization
 
-    println!("{}", vecused.join("\n"));
+    let out = vecused
+        .iter_mut()
+        .map(|v| {
+            if let Some(sym) = &symop {
+                let mut name = "unknown";
+                for b in sym {
+                    if b.0 == *v {
+                        name = b.1
+                    }
+                }
+
+                format!("{:#010x} {}", v, name)
+            } else {
+                format!("{:#010x}", v)
+            }
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    println!("{}", out);
 }
