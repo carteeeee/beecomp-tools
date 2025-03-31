@@ -1,0 +1,5 @@
+# compilation objects
+target/
+
+# rom data
+output/

@@ -3,7 +3,7 @@ this is the WORLDS WORST python script that replaces all US characters with JP c
 
 seriously. don't use this. it's bad.
 
-## use
+## usage
 install imagemagick (if you don't already have it)
 make sure you have jp assets already extracted!
 then run

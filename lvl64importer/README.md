@@ -3,7 +3,7 @@ it imports the lvl64s :D
 
 literally alpha build rn, do not use, it sucks and is very hacky
 
-## use
+## usage
 add the python file as an add-on to blender.
 make sure fast64 is also installed.
 
@@ -29,13 +29,12 @@ unchecked features are planned.
   - [x] echo level
   - [ ] fog?
   - [ ] background
-  - [ ] entry dialog
+  - [x] entry dialog
 - [x] collision
 - [ ] objects
   - [x] basic functionality (bhvs, pos, model, etc)
   - [ ] global object bank shenanigans?
   - [ ] hackersm64 renamed bhvs
   - [ ] custom bhvs
-- [ ] textures/visual model (f3d buffer stuff)
-- [ ] special boxes (such as water)
-- [ ] meow on startup (/hj)
+- [ ] textures/visual model (ew displaylists)
+- [x] special boxes (such as water)

@@ -5,14 +5,14 @@ does not require rm!
 
 special thanks to the local doe, this is based on BIFE!
 
-## use
+## usage
 ```
-cargo run -- <romname> # for testing
-./cdialog <romname> # if you have a binary
+cargo run -- <rompath> # for testing
+./cdialog <rompath> # if you have a binary
 ```
 
 you can specify another argument for the output.
 if there isn't an output name specified, it outputs as `dialog.c`
 ```
-./cdialog <romname> <outname>
+./cdialog <rompath> <outpath>
 ```

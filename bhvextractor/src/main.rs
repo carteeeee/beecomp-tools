@@ -1,3 +1,5 @@
+// written by carter. 20250106
+// "i don't have a quote to put here!"
 use base64::prelude::*;
 use inflate::inflate_bytes;
 use serde_json::Value;

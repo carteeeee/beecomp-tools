@@ -1,10 +1,12 @@
 # m64reader
-simple tool to read m64 (n64 music sequence format) files from a rom, for sm64 decomp.
+simple tool to read m64 (n64 music sequence format) files from a rom.
+this only works on binary romhacks, reading m64s from decomp roms will not work!
 
 special thanks to emax, this is based on her code!
 
-## use
+## usage
+
 ```
-cargo run -- <romname> # for testing
-./m64reader <romname> # if you have a binary
+cargo run -- <rompath> # for testing
+./m64reader <rompath> # if you have a binary
 ```

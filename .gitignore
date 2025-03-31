@@ -1,12 +1,4 @@
-# target/build data
-bhvextractor/target/
-jpfont/__pycache__/
-m64reader/target/
-cdialog/target/
-
 # rom data
-m64reader/output/
-cdialog/*.c
 *.lvl64
 *.m64
 *.z64

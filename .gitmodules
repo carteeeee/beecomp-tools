@@ -1,0 +1,3 @@
+[submodule "lvl64exporter/SM64Lib"]
+	path = lvl64exporter/SM64Lib
+	url = https://git.pilzinsel64.de/sm64-rom-manager/SM64Lib

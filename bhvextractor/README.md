@@ -1,9 +1,9 @@
 # bhvextractor
 simple tool written in rust to determine every used behavior in a folder of lvl64 files, optionally with bhv names if you input a config file. (config file trol unimpl)
 
-**in its current state, this just prints out every behavior, i reccommend outputting it to a file.**
+**in its current state, this just prints out every behavior, i reccommend piping it to a file.**
 
-## use
+## usage
 leveldir should be the directory where your lvl64s are.
 
 if you want addresses in virtual memory, set memdump to .bin dump of the memory from project64. if you just want segmented addresses, set this to "seg"

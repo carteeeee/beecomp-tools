@@ -10,8 +10,9 @@ these are very much in development right now, but in the future they should be m
 if there's a check, it's done.
 if not, it's in progress/not started
 
-- [ ] .lvl64 importer (in development)
-- [ ] [m64 exporter](m64reader)
-- [ ] [bhvextractor](bhvextractor)
+- [ ] [.lvl64 importer](lvl64importer)
+- [x] [.lvl64 exporter](lvl64exporter)
+- [x] [m64 exporter](m64reader)
+- [ ] [behavior extractor](bhvextractor)
 - [x] [c dialog exporter](cdialog)
 - [x] [us to jp font for decomp](jpfont)
