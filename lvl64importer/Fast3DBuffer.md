@@ -4,6 +4,8 @@ Fast3DBuffer is a type in SM64Lib (the backbone of SM64 Rom Manager) which conta
 Fast3DBuffers are made of multiple parts:
 - [Lighting Information](#Lighting)
 - [Materials](#Materials)
+- [Vertices](#Vertices)
+- [Displaylists](#Displaylists)
 
 ## Lighting
 - 00: Ambient Color R
@@ -31,4 +33,12 @@ Fast3DBuffers are made of multiple parts:
 - 19-23: unused, always 0
 
 ## Materials
-idk
+writes texture, aligns, writes palette (if it has one), then aligns
+
+will update later when i figure out 2 parse
+
+## Vertices
+yes
+
+## Displaylists
+more stuff including fog
